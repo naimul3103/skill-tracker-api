@@ -1,4 +1,4 @@
-````markdown
+
 # 🚀 Developer Skill Tracker API
 
 A comprehensive, production-style REST API built with **FastAPI** for tracking technical skills, proficiency levels, and daily learning journals. This project demonstrates advanced API design patterns, including resource linking, cross-resource validation, and data integrity enforcement.
@@ -26,10 +26,10 @@ A comprehensive, production-style REST API built with **FastAPI** for tracking t
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/skill-tracker-api.git
+   git clone https://github.com/naimul3103/skill-tracker-api.git
    cd skill-tracker-api
    ```
-````
+
 
 2. **Create and activate a virtual environment:**
 
@@ -61,112 +61,22 @@ Once the server is running, visit:
 - **ReDoc** (Alternative reference): [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
 ---
+## 🛣️ API Endpoints Overview
 
-## 🛣️ API Reference
+### Skills
+- `POST /skills/` - Create a new skill
+- `GET /skills/` - List all skills (filterable by `?category=Backend`)
+- `GET /skills/{id}` - Get a specific skill
+- `PUT /skills/{id}` - Update a skill
+- `DELETE /skills/{id}` - Delete a skill (fails if linked journals exist)
 
-### 1. Skills Endpoints (`/skills`)
+### Journals
+- `POST /journals/` - Create a journal entry (optionally link to a `skill_id`)
+- `GET /journals/` - List journals (filterable by `?skill_id=1`)
+- `GET /journals/{id}` - Get a specific journal
+- `PUT /journals/{id}` - Update a journal
+- `DELETE /journals/{id}` - Delete a journal
 
-#### `POST /skills/` - Create a new skill
-
-Creates a new skill in the tracker.
-
-- **Request Body**:
-  ```json
-  {
-    "name": "FastAPI",
-    "category": "Backend",
-    "rating": 8
-  }
-  ```
-- **Success Response**: `201 Created`
-- **Error Responses**: `422 Unprocessable Entity` (if validation fails, e.g., rating > 10).
-
-#### `GET /skills/` - List all skills
-
-Returns a list of all skills.
-
-- **Query Parameters**:
-  - `category` (optional, string): Filter skills by category (e.g., `?category=Backend`).
-- **Success Response**: `200 OK` - Returns an array of Skill objects.
-
-#### `GET /skills/{skill_id}` - Get a specific skill
-
-- **Path Parameters**: `skill_id` (integer)
-- **Success Response**: `200 OK`
-- **Error Responses**: `404 Not Found` (if the skill does not exist).
-
-#### `PUT /skills/{skill_id}` - Update a skill
-
-Partially or fully updates a skill. You only need to send the fields you want to change.
-
-- **Request Body** (Example):
-  ```json
-  {
-    "rating": 10
-  }
-  ```
-- **Success Response**: `200 OK`
-- **Error Responses**: `404 Not Found`, `422 Unprocessable Entity`.
-
-#### `DELETE /skills/{skill_id}` - Delete a skill
-
-Deletes a skill. **Important:** Uses the RESTRICT pattern. If any journals are linked to this skill, the deletion will be blocked.
-
-- **Success Response**: `204 No Content`
-- **Error Responses**:
-  - `404 Not Found`
-  - `400 Bad Request`: "Cannot delete skill because X journal(s) are linked to it."
-
----
-
-### 2. Journals Endpoints (`/journals`)
-
-#### `POST /journals/` - Create a new journal entry
-
-Creates a learning journal entry. Can optionally be linked to an existing skill via `skill_id`.
-
-- **Request Body**:
-  ```json
-  {
-    "title": "Learned Pydantic validation",
-    "content": "Today I learned how Pydantic automatically validates request bodies.",
-    "skill_id": 1
-  }
-  ```
-- **Success Response**: `201 Created`
-- **Error Responses**:
-  - `422 Unprocessable Entity` (invalid data types/length)
-  - `400 Bad Request` (if `skill_id` is provided but the skill does not exist).
-
-#### `GET /journals/` - List all journals
-
-Returns a list of all journal entries.
-
-- **Query Parameters**:
-  - `skill_id` (optional, integer): Filter journals linked to a specific skill (e.g., `?skill_id=1`).
-- **Success Response**: `200 OK`
-
-#### `GET /journals/{journal_id}` - Get a specific journal
-
-- **Path Parameters**: `journal_id` (integer)
-- **Success Response**: `200 OK`
-- **Error Responses**: `404 Not Found`
-
-#### `PUT /journals/{journal_id}` - Update a journal
-
-Partially or fully updates a journal entry. If you change the `skill_id`, it will validate that the new skill exists.
-
-- **Success Response**: `200 OK`
-- **Error Responses**: `404 Not Found`, `400 Bad Request` (invalid skill_id), `422 Unprocessable Entity`.
-
-#### `DELETE /journals/{journal_id}` - Delete a journal
-
-Deletes a journal entry. This does not affect the linked skill.
-
-- **Success Response**: `204 No Content`
-- **Error Responses**: `404 Not Found`
-
----
 
 ## 🏗️ Project Architecture
 
@@ -192,26 +102,3 @@ skill-tracker-api/
 ## 📜 License
 
 MIT License. Free to use and modify.
-
-```
-
----
-
-### Phase 6 Assessment (Final Review)
-
-You have the README, you have the `.gitignore` strategy, and you are ready for GitHub!
-
-To officially close out this project and move to the next major topic in your FastAPI journey, I need you to answer the **5 review questions** from my previous message. This ensures the logic is locked in your brain before we move on.
-
-**Just reply with your answers to these 5 questions:**
-
-1. **Why did we use `exclude_unset=True` in our `PUT` (update) endpoints?** What bad thing would happen if we didn't use it?
-2. **Why does our `JournalCreate` schema have `skill_id: Optional[int]` instead of just `skill_id: int`?**
-3. **Explain the "RESTRICT" logic we added to the `DELETE /skills/{id}` endpoint.** Why did we check the `JOURNALS_DB` before deleting the skill?
-4. **What is the purpose of the `db.py` file?** Why didn't we just keep the `SKILLS_DB` dictionary inside `routers/skills.py`?
-5. **If a client sends a JSON request with `"rating": 15` to `POST /skills/`, what status code will FastAPI return automatically, and why?**
-
-Once you answer these, you will have officially mastered this consolidation project, and we will plan our next big learning step!
-```
-# skill-tracker-api
-# skill-tracker-api
