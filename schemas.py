@@ -1,6 +1,6 @@
 # schemas.py
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 
 # ==================== SKILL SCHEMAS ====================
@@ -67,6 +67,9 @@ class SkillResponse(SkillBase):
         examples=[1]
     )
 
+    class Config:
+        from_attributes = True  # Allows Pydantic to read from ORM objects
+
 
 # ==================== JOURNAL SCHEMAS ====================
 
@@ -125,3 +128,25 @@ class JournalResponse(JournalBase):
         description="Unique identifier for the journal entry",
         examples=[1]
     )
+
+    class Config:
+        from_attributes = True  # Allows Pydantic to read from ORM objects
+
+
+# ==================== NESTED SCHEMAS ====================
+
+class JournalInSkill(JournalBase):
+    """Schema used when returning journals nested inside a skill."""
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class SkillWithJournalsResponse(SkillBase):
+    """Skill response that INCLUDES all linked journals."""
+    id: int
+    journals: List[JournalInSkill] = []
+
+    class Config:
+        from_attributes = True
