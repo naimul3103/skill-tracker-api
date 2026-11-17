@@ -1,64 +1,97 @@
-````markdown
-# 🚀 Developer Skill Tracker API
+# 🎯 Skill Tracker API (v2.0)
 
-A comprehensive, production-style REST API built with **FastAPI** for tracking technical skills, proficiency levels, and daily learning journals. This project demonstrates advanced API design patterns, including resource linking, cross-resource validation, and data integrity enforcement.
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=flat&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org)
+[![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063?style=flat&logo=pydantic&logoColor=white)](https://docs.pydantic.dev)
+[![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=flat&logo=sqlite&logoColor=white)](https://www.sqlite.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## ✨ Features
-
-- **Full CRUD Operations**: Complete Create, Read, Update, and Delete functionality for Skills and Journals.
-- **Resource Linking (Foreign Keys)**: Link journal entries to specific skills using a `skill_id` reference.
-- **Data Integrity (RESTRICT Pattern)**: Prevents the deletion of skills that have active journals linked to them, avoiding orphaned records.
-- **Partial Updates**: Uses Pydantic's `exclude_unset=True` to allow updating specific fields without overwriting the rest of the resource.
-- **Robust Data Validation**: Pydantic schemas enforce data types, string lengths, and value ranges (e.g., rating 1-10) automatically, returning `422 Unprocessable Entity` on bad data.
-- **Professional Documentation**: Automatically generated, highly detailed Swagger UI and ReDoc endpoints with examples.
-
-## 🛠️ Tech Stack
-
-- **Framework**: FastAPI
-- **Server**: Uvicorn (ASGI)
-- **Validation**: Pydantic v2
-- **Language**: Python 3.10+
-- **Architecture**: Separation of Concerns (Routers, Schemas, Database layer)
+A modular RESTful API built with **FastAPI**, **SQLAlchemy ORM**, and **Pydantic v2** for tracking technical skill progression and maintaining structured learning journals with strict relational integrity.
 
 ---
 
-## 📦 Installation & Setup
+## 📑 Table of Contents
 
-1. **Clone the repository:**
+- [⚡ Quick Start](#-quick-start)
+- [🏗️ System Architecture &amp; Project Skeleton](#️-system-architecture--project-skeleton)
+- [🧬 Database &amp; Pydantic Schema Design](#-database--pydantic-schema-design)
+- [🧭 Business Logic &amp; Validation Decision Tree](#-business-logic--validation-decision-tree)
+- [🛣️ API Reference](#️-api-reference)
+  - [1. Skills Endpoints (`/skills`)](#1-skills-endpoints-skills)
+  - [2. Journals Endpoints (`/journals`)](#2-journals-endpoints-journals)
+- [🚀 Git Deployment Checklist](#-git-deployment-checklist)
+- [📜 License](#-license)
+
+---
+
+## ⚡ Quick Start
+
+1. **Clone & enter the repository:**
+
    ```bash
-   git clone https://github.com/yourusername/skill-tracker-api.git
+   git clone <your-repo-url>
    cd skill-tracker-api
    ```
-````
 
-2. **Create and activate a virtual environment:**
+2. **Create a virtual environment & install dependencies:**
 
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install fastapi uvicorn sqlalchemy pydantic
    ```
 
-3. **Install dependencies:**
+3. **Run the development server:**
+
    ```bash
-   python -m pip install -r requirements.txt
+   uvicorn main:app --reload
    ```
 
-## 🏃 Running the Application
+   - **Interactive Swagger Docs:** `http://127.0.0.1:8000/docs`
+   - **ReDoc Specification:** `http://127.0.0.1:8000/redoc`
 
-Start the development server:
+---
 
-```bash
-python -m uvicorn main:app --reload
-```
+## 🏗️ System Architecture & Project Skeleton
 
-The API will be available at `http://127.0.0.1:8000`.
+The codebase strictly adheres to the **Separation of Concerns** principle—decoupling HTTP routing, request validation, ORM persistence, and database session management.
 
-## 📚 Interactive API Documentation
+### Request Lifecycle & Layer Separation
 
-Once the server is running, visit:
+<p align="center">
+  <img src="assets/architecture.svg" alt="Request Lifecycle & Layer Separation" width="720" />
+</p>
 
-- **Swagger UI** (Interactive testing): [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **ReDoc** (Alternative reference): [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+### Directory Structure
+
+<p align="center">
+  <img src="assets/skeleton.svg" alt="Project Skeleton & Separation of Concerns" width="720" />
+</p>
+
+---
+
+## 🧬 Database & Pydantic Schema Design
+
+<p align="center">
+  <img src="assets/schemas.svg" alt="Entity-Relationship & Pydantic Schema Contract" width="720" />
+</p>
+
+### Engineering & Architectural Highlights
+
+| Pattern                | Implementation                                                | Architectural Benefit                                                                    |
+| :--------------------- | :------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| **Session Lifecycle**  | `Depends(get_db)` with `try / finally` `yield`                | Guarantees per-request SQLAlchemy session isolation and automatic connection teardown.   |
+| **Eager Nesting**      | SQLAlchemy `relationship()` + Pydantic `from_attributes=True` | Resolves `Skill` + nested `List[Journal]` seamlessly in `/skills/{id}/details`.          |
+| **RESTRICT Guard**     | `db.query(Journal).filter(...).count()`                       | Enforces referential integrity at `O(1)` memory overhead before deleting parent skills.  |
+| **Safe Partial Patch** | `model_dump(exclude_unset=True)`                              | Prevents omitted fields in `PUT` payloads from overwriting existing columns with `None`. |
+
+---
+
+## 🧭 Business Logic & Validation Decision Tree
+
+<p align="center">
+  <img src="assets/decision-tree.svg" alt="Integrity Decision Tree" width="720" />
+</p>
 
 ---
 
@@ -66,152 +99,110 @@ Once the server is running, visit:
 
 ### 1. Skills Endpoints (`/skills`)
 
-#### `POST /skills/` - Create a new skill
+| Method   | Endpoint                     | Description                                   | Parameters / Body                      | Status Codes        |
+| :------- | :--------------------------- | :-------------------------------------------- | :------------------------------------- | :------------------ |
+| `POST`   | `/skills/`                   | Create a new skill                            | Body: `SkillCreate`                    | `201`, `422`        |
+| `GET`    | `/skills/`                   | List all skills                               | Query: `?category=Backend`             | `200`               |
+| `GET`    | `/skills/{skill_id}`         | Retrieve a single skill                       | Path: `skill_id` (`int`)               | `200`, `404`        |
+| `GET`    | `/skills/{skill_id}/details` | Retrieve skill with nested journals           | Path: `skill_id` (`int`)               | `200`, `404`        |
+| `PUT`    | `/skills/{skill_id}`         | Partially or fully update a skill             | Path: `skill_id` · Body: `SkillUpdate` | `200`, `404`, `422` |
+| `DELETE` | `/skills/{skill_id}`         | Delete skill (**RESTRICT** if journals exist) | Path: `skill_id` (`int`)               | `204`, `400`, `404` |
 
-Creates a new skill in the tracker.
+<details>
+<summary><b>📄 View Sample Payloads for <code>/skills</code></b></summary>
 
-- **Request Body**:
-  ```json
-  {
-    "name": "FastAPI",
-    "category": "Backend",
-    "rating": 8
-  }
-  ```
-- **Success Response**: `201 Created`
-- **Error Responses**: `422 Unprocessable Entity` (if validation fails, e.g., rating > 10).
+#### `POST /skills/` — Request Body
 
-#### `GET /skills/` - List all skills
+```json
+{
+  "name": "FastAPI",
+  "category": "Backend",
+  "rating": 8
+}
+```
 
-Returns a list of all skills.
+#### `GET /skills/1/details` — `200 OK` Response
 
-- **Query Parameters**:
-  - `category` (optional, string): Filter skills by category (e.g., `?category=Backend`).
-- **Success Response**: `200 OK` - Returns an array of Skill objects.
+```json
+{
+  "id": 1,
+  "name": "FastAPI",
+  "category": "Backend",
+  "rating": 9,
+  "journals": [
+    {
+      "id": 1,
+      "title": "Learned routing",
+      "content": "Explored APIRouter and dependency injection.",
+      "skill_id": 1
+    }
+  ]
+}
+```
 
-#### `GET /skills/{skill_id}` - Get a specific skill
+#### `PUT /skills/1` — Partial Update Request
 
-- **Path Parameters**: `skill_id` (integer)
-- **Success Response**: `200 OK`
-- **Error Responses**: `404 Not Found` (if the skill does not exist).
+```json
+{
+  "rating": 10
+}
+```
 
-#### `PUT /skills/{skill_id}` - Update a skill
+#### `DELETE /skills/1` — `400 Bad Request` (RESTRICT Triggered)
 
-Partially or fully updates a skill. You only need to send the fields you want to change.
+```json
+{
+  "detail": "Cannot delete skill because 1 journal(s) are linked to it."
+}
+```
 
-- **Request Body** (Example):
-  ```json
-  {
-    "rating": 10
-  }
-  ```
-- **Success Response**: `200 OK`
-- **Error Responses**: `404 Not Found`, `422 Unprocessable Entity`.
-
-#### `DELETE /skills/{skill_id}` - Delete a skill
-
-Deletes a skill. **Important:** Uses the RESTRICT pattern. If any journals are linked to this skill, the deletion will be blocked.
-
-- **Success Response**: `204 No Content`
-- **Error Responses**:
-  - `404 Not Found`
-  - `400 Bad Request`: "Cannot delete skill because X journal(s) are linked to it."
+</details>
 
 ---
 
 ### 2. Journals Endpoints (`/journals`)
 
-#### `POST /journals/` - Create a new journal entry
+| Method   | Endpoint                 | Description                                  | Parameters / Body                          | Status Codes               |
+| :------- | :----------------------- | :------------------------------------------- | :----------------------------------------- | :------------------------- |
+| `POST`   | `/journals/`             | Create a journal entry (optional `skill_id`) | Body: `JournalCreate`                      | `201`, `400`, `422`        |
+| `GET`    | `/journals/`             | List all journal entries                     | Query: `?skill_id=1`                       | `200`                      |
+| `GET`    | `/journals/{journal_id}` | Retrieve a specific journal entry            | Path: `journal_id` (`int`)                 | `200`, `404`               |
+| `PUT`    | `/journals/{journal_id}` | Update entry & re-validate `skill_id`        | Path: `journal_id` · Body: `JournalUpdate` | `200`, `400`, `404`, `422` |
+| `DELETE` | `/journals/{journal_id}` | Delete a journal entry (leaves skill intact) | Path: `journal_id` (`int`)                 | `204`, `404`               |
 
-Creates a learning journal entry. Can optionally be linked to an existing skill via `skill_id`.
+<details>
+<summary><b>📄 View Sample Payloads for <code>/journals</code></b></summary>
 
-- **Request Body**:
-  ```json
-  {
-    "title": "Learned Pydantic validation",
-    "content": "Today I learned how Pydantic automatically validates request bodies.",
-    "skill_id": 1
-  }
-  ```
-- **Success Response**: `201 Created`
-- **Error Responses**:
-  - `422 Unprocessable Entity` (invalid data types/length)
-  - `400 Bad Request` (if `skill_id` is provided but the skill does not exist).
+#### `POST /journals/` — Request Body
 
-#### `GET /journals/` - List all journals
+```json
+{
+  "title": "Learned Pydantic validation",
+  "content": "Today I learned how Pydantic automatically validates request bodies.",
+  "skill_id": 1
+}
+```
 
-Returns a list of all journal entries.
+_(Returns `400 Bad Request` if `skill_id` does not exist in the `skills` table.)_
 
-- **Query Parameters**:
-  - `skill_id` (optional, integer): Filter journals linked to a specific skill (e.g., `?skill_id=1`).
-- **Success Response**: `200 OK`
-
-#### `GET /journals/{journal_id}` - Get a specific journal
-
-- **Path Parameters**: `journal_id` (integer)
-- **Success Response**: `200 OK`
-- **Error Responses**: `404 Not Found`
-
-#### `PUT /journals/{journal_id}` - Update a journal
-
-Partially or fully updates a journal entry. If you change the `skill_id`, it will validate that the new skill exists.
-
-- **Success Response**: `200 OK`
-- **Error Responses**: `404 Not Found`, `400 Bad Request` (invalid skill_id), `422 Unprocessable Entity`.
-
-#### `DELETE /journals/{journal_id}` - Delete a journal
-
-Deletes a journal entry. This does not affect the linked skill.
-
-- **Success Response**: `204 No Content`
-- **Error Responses**: `404 Not Found`
+</details>
 
 ---
 
-## 🏗️ Project Architecture
+## 🚀 Git Deployment Checklist
 
-This project follows the **Separation of Concerns** principle to ensure maintainability:
+Before pushing to your remote repository, verify that the local SQLite database is excluded:
 
-```text
-skill-tracker-api/
-├── main.py              # App initialization, lifespan events, and router inclusion
-├── schemas.py           # Pydantic models (Data shapes, validation rules, examples)
-├── db.py                # Mock database layer (In production, replaced by SQL/NoSQL ORM)
-└── routers/
-    ├── __init__.py      # Package marker
-    ├── skills.py        # Skill endpoints and business logic
-    └── journals.py      # Journal endpoints and cross-resource validation
-```
+1. Ensure `skill_tracker.db` is listed in your `.gitignore` and not staged in `git status`.
+2. Stage, commit, and push your changes:
+   ```bash
+   git add .
+   git commit -m "Upgrade to v2.0: Replace dictionary with SQLite + SQLAlchemy"
+   git push -f origin main
+   ```
 
-### Key Design Decisions
-
-1. **Shared Database Layer (`db.py`)**: Instead of defining databases inside individual routers, we centralize them in `db.py`. This prevents circular imports and allows the Journals router to easily query the Skills database for validation.
-2. **Pydantic v2 `exclude_unset=True`**: Used in `PUT` endpoints to ensure that if a client only sends `{"rating": 10}`, the server doesn't accidentally overwrite the `name` and `category` with `null`.
-3. **RESTRICT Deletion**: Before deleting a skill, the API checks the `JOURNALS_DB` for dependencies. This prevents "orphaned" journal entries that point to non-existent skills.
+---
 
 ## 📜 License
 
-MIT License. Free to use and modify.
-
-```
-
----
-
-### Phase 6 Assessment (Final Review)
-
-You have the README, you have the `.gitignore` strategy, and you are ready for GitHub!
-
-To officially close out this project and move to the next major topic in your FastAPI journey, I need you to answer the **5 review questions** from my previous message. This ensures the logic is locked in your brain before we move on.
-
-**Just reply with your answers to these 5 questions:**
-
-1. **Why did we use `exclude_unset=True` in our `PUT` (update) endpoints?** What bad thing would happen if we didn't use it?
-2. **Why does our `JournalCreate` schema have `skill_id: Optional[int]` instead of just `skill_id: int`?**
-3. **Explain the "RESTRICT" logic we added to the `DELETE /skills/{id}` endpoint.** Why did we check the `JOURNALS_DB` before deleting the skill?
-4. **What is the purpose of the `db.py` file?** Why didn't we just keep the `SKILLS_DB` dictionary inside `routers/skills.py`?
-5. **If a client sends a JSON request with `"rating": 15` to `POST /skills/`, what status code will FastAPI return automatically, and why?**
-
-Once you answer these, you will have officially mastered this consolidation project, and we will plan our next big learning step!
-```
-# skill-tracker-api
-# skill-tracker-api
+Distributed under the **MIT License**. Free to use, modify, and distribute.

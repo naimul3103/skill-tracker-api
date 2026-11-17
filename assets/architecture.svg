@@ -1,0 +1,50 @@
+<svg width="720" height="270" viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #0d1117; rx: 12; stroke: #30363d; stroke-width: 1.5; }
+    .box { fill: #161b22; stroke: #30363d; stroke-width: 2; rx: 8; }
+    .header { fill: #58a6ff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; font-weight: bold; letter-spacing: 1px; }
+    .title { fill: #f0f6fc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; font-weight: bold; }
+    .sub { fill: #8b949e; font-family: monospace; font-size: 11px; }
+    .flow { stroke: #58a6ff; stroke-width: 2; fill: none; stroke-dasharray: 6; animation: dash 1.5s linear infinite; }
+    .pulse-box { animation: glow 3s ease-in-out infinite; }
+    @keyframes dash { to { stroke-dashoffset: -12; } }
+    @keyframes glow { 0%, 100% { stroke: #30363d; } 50% { stroke: #58a6ff; } }
+  </style>
+
+  <rect width="720" height="270" class="bg" />
+  <text x="360" y="26" text-anchor="middle" class="header">REQUEST LIFECYCLE &amp; LAYER SEPARATION</text>
+
+  <!-- Entry Point -->
+  <rect x="25" y="95" width="135" height="85" class="box pulse-box" />
+  <text x="92" y="128" text-anchor="middle" class="title">main.py</text>
+  <text x="92" y="148" text-anchor="middle" class="sub">FastAPI Entry</text>
+  <text x="92" y="164" text-anchor="middle" class="sub">CORS &amp; Routers</text>
+
+  <!-- Animated Connectors -->
+  <path d="M 160 120 L 225 80" class="flow" />
+  <path d="M 160 155 L 225 195" class="flow" />
+  <path d="M 385 80 L 450 120" class="flow" />
+  <path d="M 385 195 L 450 155" class="flow" />
+  <path d="M 580 137 L 615 137" class="flow" />
+
+  <!-- Routers -->
+  <rect x="225" y="42" width="160" height="75" class="box" />
+  <text x="305" y="72" text-anchor="middle" class="title">routers/skills.py</text>
+  <text x="305" y="92" text-anchor="middle" class="sub">CRUD + RESTRICT Check</text>
+
+  <rect x="225" y="157" width="160" height="75" class="box" />
+  <text x="305" y="187" text-anchor="middle" class="title">routers/journals.py</text>
+  <text x="305" y="207" text-anchor="middle" class="sub">CRUD + FK Validation</text>
+
+  <!-- Validation & ORM -->
+  <rect x="450" y="78" width="130" height="118" class="box pulse-box" />
+  <text x="515" y="110" text-anchor="middle" class="title">Data Layer</text>
+  <text x="515" y="132" text-anchor="middle" class="sub">schemas.py</text>
+  <text x="515" y="149" text-anchor="middle" class="sub">models.py</text>
+  <text x="515" y="166" text-anchor="middle" class="sub">database.py</text>
+
+  <!-- Persistence -->
+  <rect x="615" y="95" width="80" height="85" class="box" />
+  <text x="655" y="132" text-anchor="middle" class="title">SQLite</text>
+  <text x="655" y="152" text-anchor="middle" class="sub">.db file</text>
+</svg>

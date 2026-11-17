@@ -1,0 +1,78 @@
+<svg width="720" height="310" viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #0d1117; rx: 12; stroke: #30363d; stroke-width: 1.5; }
+    .card { fill: #161b22; stroke: #30363d; stroke-width: 2; rx: 8; }
+    .card-head-skill { fill: #1f6feb; }
+    .card-head-journal { fill: #238636; }
+    .head-text { fill: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; font-weight: bold; }
+    .field { fill: #c9d1d9; font-family: monospace; font-size: 12px; }
+    .type { fill: #79c0ff; font-family: monospace; font-size: 11px; }
+    .constraint { fill: #ffa657; font-family: monospace; font-size: 10px; }
+    .badge-text { fill: #8b949e; font-family: sans-serif; font-size: 11px; font-weight: bold; }
+    .rel-line { stroke: #3fb950; stroke-width: 2.5; fill: none; stroke-dasharray: 8 4; animation: flowRel 1.8s linear infinite; }
+    @keyframes flowRel { to { stroke-dashoffset: -24; } }
+  </style>
+
+  <rect width="720" height="310" class="bg" />
+  <text x="360" y="25" text-anchor="middle" class="badge-text">ENTITY-RELATIONSHIP &amp; PYDANTIC SCHEMA CONTRACT</text>
+
+  <!-- SKILL TABLE / SCHEMA -->
+  <rect x="35" y="45" width="265" height="225" class="card" />
+  <path d="M 35 53 Q 35 45 43 45 L 292 45 Q 300 45 300 53 L 300 78 L 35 78 Z" class="card-head-skill" />
+  <text x="167" y="66" text-anchor="middle" class="head-text">Skill (ORM &amp; Pydantic)</text>
+
+  <text x="50" y="102" class="field">🔑 id</text>
+  <text x="165" y="102" class="type">Integer</text>
+  <text x="235" y="102" class="constraint">PK, Index</text>
+
+  <text x="50" y="128" class="field">   name</text>
+  <text x="165" y="128" class="type">String</text>
+  <text x="235" y="128" class="constraint">Required</text>
+
+  <text x="50" y="154" class="field">   category</text>
+  <text x="165" y="154" class="type">String</text>
+  <text x="235" y="154" class="constraint">Indexed</text>
+
+  <text x="50" y="180" class="field">   rating</text>
+  <text x="165" y="180" class="type">Integer</text>
+  <text x="235" y="180" class="constraint">1 to 10</text>
+
+  <line x1="45" y1="198" x2="290" y2="198" stroke="#30363d" stroke-width="1" />
+  <text x="50" y="218" class="field">🔗 journals</text>
+  <text x="165" y="218" class="type">List[Journal]</text>
+  <text x="50" y="242" class="constraint">• SkillCreate / SkillUpdate (Optional fields)</text>
+  <text x="50" y="257" class="constraint">• SkillWithJournals (from_attributes=True)</text>
+
+  <!-- Animated 1:N Connector -->
+  <path d="M 300 155 C 360 155, 360 180, 420 180" class="rel-line" />
+  <circle cx="305" cy="155" r="4" fill="#58a6ff" />
+  <text x="360" y="148" text-anchor="middle" class="head-text" fill="#3fb950">1 : N</text>
+  <text x="360" y="196" text-anchor="middle" class="constraint">RESTRICT</text>
+
+  <!-- JOURNAL TABLE / SCHEMA -->
+  <rect x="420" y="45" width="265" height="225" class="card" />
+  <path d="M 420 53 Q 420 45 428 45 L 677 45 Q 685 45 685 53 L 685 78 L 420 78 Z" class="card-head-journal" />
+  <text x="552" y="66" text-anchor="middle" class="head-text">Journal (ORM &amp; Pydantic)</text>
+
+  <text x="435" y="102" class="field">🔑 id</text>
+  <text x="550" y="102" class="type">Integer</text>
+  <text x="620" y="102" class="constraint">PK, Index</text>
+
+  <text x="435" y="128" class="field">   title</text>
+  <text x="550" y="128" class="type">String</text>
+  <text x="620" y="128" class="constraint">min_len=1</text>
+
+  <text x="435" y="154" class="field">   content</text>
+  <text x="550" y="154" class="type">Text</text>
+  <text x="620" y="154" class="constraint">Required</text>
+
+  <text x="435" y="180" class="field">🔗 skill_id</text>
+  <text x="550" y="180" class="type">Integer</text>
+  <text x="620" y="180" class="constraint">FK (Null)</text>
+
+  <line x1="430" y1="198" x2="675" y2="198" stroke="#30363d" stroke-width="1" />
+  <text x="435" y="218" class="field">🔗 skill</text>
+  <text x="550" y="218" class="type">Optional[Skill]</text>
+  <text x="435" y="242" class="constraint">• JournalCreate (Validates skill_id exists)</text>
+  <text x="435" y="257" class="constraint">• JournalUpdate (Re-validates skill_id)</text>
+</svg>
